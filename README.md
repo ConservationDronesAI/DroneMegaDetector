@@ -22,6 +22,13 @@ The repository provides:
 The model weights and inference code are provided together in this repository so that the detector can be directly deployed for local inference.
 
 ---
+## Model Weight
+
+The following link hosts the model weight available for download and use.
+
+https://drive.google.com/file/d/1LgfrjOIA_gh50aHGp2O4h45cNo2SrLwe/view
+
+---
 
 ## Model
 
