@@ -1,0 +1,21 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDEs
+.vscode
+
+# Model files
+*.pt
+*.pth
+
+# Other
+debug.log
+*.swp
+
+# AI things
+.claude*
+.gemini*
+
+
