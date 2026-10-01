@@ -19,7 +19,7 @@ The detector is based on [RF-DETR Medium](https://rfdetr.roboflow.com/reference/
 
 ### Flight altitude and image scale
 
-The model's training data predominantly represents drone flights conducted at approximately 50--120 m above ground level.  This range should be considered the principal operating range represented by the training data, rather than a strict altitude requirement.
+The model's training data predominantly represents drone flights conducted at approximately 50-120 m above ground level.  This range should be considered the principal operating range represented by the training data, rather than a strict altitude requirement.
 
 As altitude increases, animals occupy fewer pixels in the image. Detection performance can therefore decline when targets become substantially smaller than those represented in the training imagery.
 
