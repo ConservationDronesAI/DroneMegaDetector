@@ -72,6 +72,6 @@ Tiled inference can be useful when each image is substantially larger than the m
 
 ### HuggingFace
 
-The model also has a huhhingface compatiability which can be found at:
+The model also has Hugging Face compatibility; the Hugging Face page can be found at https://huggingface.co/ConservationDrones/DroneMegaDetector
 
-https://huggingface.co/ConservationDrones/DroneMegaDetector
+Usage of the Hugging Face model can be found in `src/HuggingFaceDemo.py`
