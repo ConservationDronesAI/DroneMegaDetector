@@ -69,3 +69,9 @@ TODO
 Both inference scripts support tiled inference for large images.  Tiled inference divides the input image into 1280 × 1280 pixel tiles (matching the resolution at which the model was trained) and performs detection independently on each tile before combining the detections.  Enable tiled inference using the `--tiled` argument.  
 
 Tiled inference can be useful when each image is substantially larger than the model's training resolution (1280 × 1280), particularly when animals occupy a small proportion of the full image.
+
+### HuggingFace
+
+The model also has a huhhingface compatiability which can be found at:
+
+https://huggingface.co/ConservationDrones/DroneMegaDetector
