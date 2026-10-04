@@ -25,6 +25,8 @@ The detector is based on [RF-DETR Medium](https://rfdetr.roboflow.com/reference/
 |        1 | Animal  |
 |        2 | Vehicle |
 
+The "animal" category is really a "mammal" category; almost all of the training examples for this category are mammals, so the behavior on non-mammal animals is undefined.
+
 
 ## Flight altitude and image scale
 
