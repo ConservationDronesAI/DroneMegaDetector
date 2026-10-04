@@ -1,5 +1,15 @@
 # DroneMegaDetector
 
+## Contents
+
+* [Overview](#overview)
+* [Model categories](#model-categories)
+* [Flight altitude and image scale](#flight-altitude-and-image-scale)
+* [Running the model](#running-the-model)
+* [Hugging Face repository](#hugging-face-repository)
+* [Sample output](#sample-output)
+
+
 ## Overview
 
 This repository provides an object-detection model for drone-based wildlife surveys. The model is intended primarily for drone imagery, but the training data includes some imagery from crewed aircraft.
@@ -110,3 +120,24 @@ The model is also available via Hugging Face at:
 > https://huggingface.co/ConservationDrones/DroneMegaDetector
 
 A demo inference script for the Hugging Face repository is provided as [hugging-face-demo.py](src/hugging-face-demo.py).
+
+
+## Sample output
+
+This section contains sample detector output on a variety of datasets.  No effort was made to determine whether these sample images were included in the training data, so this section is just here to give you a sense of what the model does, not to communicate accuracy.
+
+<img src="images/anno_aerial-elephants~training_images~7ce34969818584fb09f9e98c7d0999fc0eb4d70f.jpg"><br/>
+Image from the <a href="https://zenodo.org/records/3234780">Aerial Elephant Dataset</a>.<br/>
+
+<img src="images/anno_eikelboom-savanna~train~IMG_4563.jpg"><br/>
+Image from <a href="https://data.4tu.nl/articles/dataset/Improving_the_precision_and_accuracy_of_animal_population_estimates_with_aerial_image_object_detection/12713903/1">Improving the precision and accuracy of animal population estimates with aerial image object detection</a>.<br/>
+
+<img src="images/anno_koger-drones~kenyan-ungulates~ungulate-annotations~NOV02_2017_DJI_0033-3210.jpg"><br/>
+Image from <a href="https://edmond.mpg.de/dataset.xhtml?persistentId=doi:10.17617/3.EMRZGH">Quantifying the movement, behaviour and environmental context of group-living animals using drones and computer vision</a>.<br/><br/>
+
+<img src="images/anno_naik-bucktales~Detection_Dataset~coco_format_v1~test_images~cllduy3d20ak3078e3dkf5g5w.jpg"><br/>
+Image from the <a href="https://edmond.mpg.de/dataset.xhtml?persistentId=doi:10.17617/3.JCZ9WK">BuckTales</a> dataset.<br/>
+
+<img src="images/anno_reinhard-savmap~savmap-zenodo~c8135057690b494aad449b969b6fe7b8.jpg"><br/>
+Image from the <a href="https://huggingface.co/datasets/fadel841/savmap">SAVMAP</a> dataset.<br/>
+
