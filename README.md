@@ -5,9 +5,7 @@
 This repository provides an object-detection model for drone-based wildlife surveys. The model is intended primarily for drone imagery, but the training data includes some imagery from crewed aircraft.
 
 
-## Model
-
-### Model categories
+## Model categories
 
 The detector is based on [RF-DETR Medium](https://rfdetr.roboflow.com/reference/medium/) and is trained as a three-class object detector:
 
@@ -17,9 +15,10 @@ The detector is based on [RF-DETR Medium](https://rfdetr.roboflow.com/reference/
 |        1 | Person  |
 |        2 | Vehicle |
 
-### Flight altitude and image scale
 
-The model's training data predominantly represents drone flights conducted at approximately 50--120 m above ground level.  This range should be considered the principal operating range represented by the training data, rather than a strict altitude requirement.
+## Flight altitude and image scale
+
+The model's training data predominantly represents drone flights conducted at approximately 50-120 m above ground level.  This range should be considered the principal operating range represented by the training data, rather than a strict altitude requirement.
 
 As altitude increases, animals occupy fewer pixels in the image. Detection performance can therefore decline when targets become substantially smaller than those represented in the training imagery.
 
@@ -63,7 +62,6 @@ If the input filename is "image.jpg", the default output filename is "image.anno
 
 TODO
 
-
 ### Tiled inference
 
 Both inference scripts support tiled inference for large images.  Tiled inference divides the input image into 1280 × 1280 pixel tiles (matching the resolution at which the model was trained) and performs detection independently on each tile before combining the detections.  Enable tiled inference using the `--tiled` argument.
@@ -77,4 +75,4 @@ The model is also available via Hugging Face at:
 
 > https://huggingface.co/ConservationDrones/DroneMegaDetector
 
-
+A demo inference script for the Hugging Face repository is provided as [hugging-face-demo.py](src/hugging-face-demo.py).
