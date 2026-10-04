@@ -76,7 +76,7 @@ def main():
     parser.add_argument("--conf", type=float, default=0.5, help="Confidence threshold (e.g. 0.5)")
     parser.add_argument("--tiled", action="store_true",
                         help=f"Flag to enable tiled inference at {DEFAULT_INFERENCE_SIZE}x{DEFAULT_INFERENCE_SIZE}")
-    parser.add_argument("--output", type=str, default="output.jpg", help="Path to save the annotated output image")
+    parser.add_argument("--output", type=str, default=None, help="Path to save the annotated output image")
 
     args = parser.parse_args()
 
@@ -139,12 +139,17 @@ def main():
         )
 
     # Write image
-    cv2.imwrite(args.output, annotated_image)
-    print(f"[*] Success, annotated image saved to: {args.output}")
+    if args.output is not None:
+        output_filename = args.output
+    else:
+        bn,ext = os.path.splitext(args.image)
+        output_filename = bn + '.annotated' + ext
+    cv2.imwrite(output_filename, annotated_image)
+    print(f"[*] Success, annotated image saved to: {output_filename}")
 
     # Show the image window
     print("[*] Displaying image. Press any key on the image window to exit.")
-    # Standard sizing trick if the image is massive
+
     height, width = annotated_image.shape[:2]
     if max(height, width) > 1000:
         scale = 1000 / max(height, width)
