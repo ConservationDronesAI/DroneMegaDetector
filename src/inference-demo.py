@@ -34,15 +34,28 @@ else:
 
 def get_rf_resolution(checkpoint_path, default=DEFAULT_INFERENCE_SIZE):
     """
-    Attempts to read the optimal resolution directly from the model weights.
+    Attempts to read the training resolution directly from the model weights.
     Falls back to a default value if missing.
+
+    Current RF-DETR checkpoints (rfdetr >= 1.8.0) record the resolution in the
+    top-level 'model_config' dict.  Checkpoints from the older (pre-1.6) training
+    code record it in 'args', an argparse.Namespace.  In between, 'args' is a dict
+    of training settings that doesn't include the resolution.
     """
     try:
         ckpt = torch.load(checkpoint_path, map_location='cpu', weights_only=False)
-        if 'args' in ckpt and hasattr(ckpt['args'], 'resolution'):
-            res = ckpt['args'].resolution
+        res = None
+        if isinstance(ckpt.get('model_config'), dict):
+            res = ckpt['model_config'].get('resolution')
+        if res is None and 'args' in ckpt:
+            if isinstance(ckpt['args'], dict):
+                res = ckpt['args'].get('resolution')
+            else:
+                res = getattr(ckpt['args'], 'resolution', None)
+        if res is not None:
             print(f"[*] Detected native resolution {res} from {os.path.basename(checkpoint_path)}")
             return res
+        print(f"[*] No resolution recorded in {os.path.basename(checkpoint_path)}, using default {default}")
     except Exception as e:
         print(f"[!] Could not read resolution from checkpoint (using default {default}): {e}")
     return default

@@ -6,3 +6,4 @@ Pillow>=9.5.0
 supervision>=0.30.6
 tqdm>=4.65.0
 rfdetr>=1.11.1
+megadetector-utils>=10.0.25
