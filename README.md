@@ -12,7 +12,7 @@
 
 ## Overview
 
-This repository provides an object-detection model for drone-based wildlife surveys. The model is intended primarily for drone imagery, but the training data includes some imagery from crewed aircraft.
+This repository provides an object-detection model for detecting mammals in drone-based wildlife surveys. The model is intended primarily for drone imagery, but the training data includes some imagery from crewed aircraft.
 
 
 ## Model categories
