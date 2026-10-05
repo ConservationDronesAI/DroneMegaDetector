@@ -103,7 +103,7 @@ Arguments:
 | `--skip_video`             | No       | Only process images                                                                                 |
 | `--time_sample`            | No       | For videos, process one frame every N seconds (default `1.0`)                                       |
 | `--frame_sample`           | No       | For videos, process every Nth frame (instead of `--time_sample`)                                    |
-| `--optimize_for_inference` | No       | Compile the model for faster inference; results may differ slightly from the uncompiled model       |
+| `--optimize_for_inference` | No       | Faster inference on NVIDIA GPUs (float16); results differ slightly from the unoptimized model       |
 | `--verbose`                | No       | Enables additional debug output                                                                     |
 
 Videos are processed by sampling frames (one frame per second by default).  Each video gets a single entry in the output file, and each detection includes the `frame_number` of the frame it came from.

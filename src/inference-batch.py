@@ -276,9 +276,10 @@ def load_model(detector_file,
             training resolution recorded in the checkpoint (or DEFAULT_IMAGE_SIZE); a
             value overrides it.
         optimize_for_inference (bool, optional): whether to optimize the model for
-            inference, which should be a free lunch, but as of 9/2025 there is some
-            risk of accuracy regression.
-        batch_size (int, optional): batch size to pass to model.inference()
+            inference: on NVIDIA GPUs, run in float16, and compile the model if [batch_size]
+            is 1.  This is faster, but results differ slightly from the unoptimized
+            model.  Ignored (with a message) on other devices.
+        batch_size (int, optional): batch size the caller will use for inference
 
     Returns:
         dict: dictionary with keys:
@@ -286,6 +287,7 @@ def load_model(detector_file,
             - 'model_type' (str): resolved variant class name (e.g. 'RFDETRMedium')
             - 'image_size' (int): resolved inference resolution
             - 'detection_categories' (dict): mapping from string category IDs to class names
+            - 'optimized_for_inference' (bool): whether the model was optimized
     """
 
     if detector_file.lower().endswith('.ckpt'):
@@ -319,8 +321,22 @@ def load_model(detector_file,
     image_size = model.model_config.resolution
     print(f'Loaded {model_type} at resolution {image_size}')
 
+    optimized = False
     if optimize_for_inference:
-        model.inference(batch_size=batch_size)
+        device = model.model.device
+        if device.type != 'cuda':
+            print(f'Inference optimization is only supported on NVIDIA GPUs, running '
+                  f'without optimization on {device.type}')
+        else:
+            # Half precision provides most of the speedup (around 3.5x at 1280 pixels).
+            # Compiling (TorchScript tracing) saves a few milliseconds per call, so it only
+            # helps at batch size 1; at larger batch sizes, the traced model needs much more
+            # GPU memory, and it only accepts batches of the size it was compiled for.
+            compile_model = (batch_size == 1)
+            print('Optimizing model for inference (float16, {})'.format(
+                'compiled' if compile_model else 'not compiled'))
+            model.inference(compile=compile_model, batch_size=batch_size, dtype=torch.float16)
+            optimized = True
 
     # Get class names from model
     #
@@ -339,7 +355,8 @@ def load_model(detector_file,
         'model': model,
         'model_type': model_type,
         'image_size': image_size,
-        'detection_categories': detection_categories
+        'detection_categories': detection_categories,
+        'optimized_for_inference': optimized
     }
 
 # ...def load_model(...)
@@ -347,7 +364,7 @@ def load_model(detector_file,
 
 #%% Inference on individual images (tiled or non-tiled)
 
-def _predict(model, images, threshold, pad_to=None):
+def _predict(model, images, threshold):
     """
     Run [model] on a list of images, without tiling.
 
@@ -355,19 +372,11 @@ def _predict(model, images, threshold, pad_to=None):
         model: a loaded RF-DETR model (from load_model)
         images (list): PIL images (or tiles)
         threshold (float): confidence threshold for detections
-        pad_to (int, optional): if [images] has fewer than this many images, pad it
-            with copies of the last image (and discard the results for the copies).
-            A model compiled by model.inference() only accepts batches of the size it
-            was compiled for.
 
     Returns:
         list: one supervision Detections object per image, containing only
         boxes, confidence values, and class IDs
     """
-
-    n_images = len(images)
-    if (pad_to is not None) and (n_images < pad_to):
-        images = images + [images[-1]] * (pad_to - n_images)
 
     if len(images) == 1:
         detections_list = [model.predict(images[0], threshold=threshold,
@@ -376,8 +385,6 @@ def _predict(model, images, threshold, pad_to=None):
         detections_list = model.predict(images, threshold=threshold,
                                         include_source_image=False)
 
-    detections_list = detections_list[:n_images]
-
     # Keep just the core arrays, so detections from different tiles can be merged
     return [sv.Detections(xyxy=d.xyxy, confidence=d.confidence, class_id=d.class_id)
             for d in detections_list]
@@ -385,8 +392,7 @@ def _predict(model, images, threshold, pad_to=None):
 # ...def _predict(...)
 
 
-def _predict_tiled(model, image, threshold, tile_size, tile_overlap, batch_size=1,
-                   pad_batches=False):
+def _predict_tiled(model, image, threshold, tile_size, tile_overlap, batch_size=1):
     """
     Run [model] on [image] in overlapping square tiles, merging detections across
     tiles with per-class non-maximum suppression.
@@ -402,20 +408,16 @@ def _predict_tiled(model, image, threshold, tile_size, tile_overlap, batch_size=
         tile_size (int): tile width and height in pixels
         tile_overlap (int): overlap between adjacent tiles in pixels
         batch_size (int, optional): number of tiles to run through the model at once
-        pad_batches (bool, optional): pad every batch of tiles to [batch_size] (see
-            _predict)
 
     Returns:
         supervision Detections: detections in full-image pixel coordinates
     """
 
-    pad_to = batch_size if pad_batches else None
-
     def tile_callback(tiles):
         # InferenceSlicer passes a single tile when batch_size is 1, otherwise a list
         if isinstance(tiles, list):
-            return _predict(model, tiles, threshold, pad_to=pad_to)
-        return _predict(model, [tiles], threshold, pad_to=pad_to)[0]
+            return _predict(model, tiles, threshold)
+        return _predict(model, [tiles], threshold)[0]
 
     slicer = sv.InferenceSlicer(
         callback=tile_callback,
@@ -431,7 +433,7 @@ def _predict_tiled(model, image, threshold, tile_size, tile_overlap, batch_size=
 
 
 def _detect(model, images, threshold, tiled=False, tile_size=None, tile_overlap=None,
-            batch_size=1, pad_batches=False):
+            batch_size=1):
     """
     Run [model] on a list of images, with or without tiling.
 
@@ -442,21 +444,18 @@ def _detect(model, images, threshold, tiled=False, tile_size=None, tile_overlap=
         tiled (bool, optional): whether to use tiled inference
         tile_size (int, optional): tile size in pixels for tiled inference
         tile_overlap (int, optional): tile overlap in pixels for tiled inference
-        batch_size (int, optional): the batch size the caller is using; for tiled
-            inference, the number of tiles to run through the model at once
-        pad_batches (bool, optional): pad every batch of images (or tiles) to
-            [batch_size] (see _predict)
+        batch_size (int, optional): for tiled inference, the number of tiles to run
+            through the model at once
 
     Returns:
         list: one supervision Detections object per image
     """
 
     if not tiled:
-        return _predict(model, images, threshold,
-                        pad_to=batch_size if pad_batches else None)
+        return _predict(model, images, threshold)
 
     return [_predict_tiled(model, image, threshold, tile_size, tile_overlap,
-                           batch_size=batch_size, pad_batches=pad_batches)
+                           batch_size=batch_size)
             for image in images]
 
 # ...def _detect(...)
@@ -474,8 +473,7 @@ def _run_detector_on_images(model,
                             include_image_size=False,
                             tiled=False,
                             tile_size=None,
-                            tile_overlap=None,
-                            pad_batches=False):
+                            tile_overlap=None):
     """
     Run [model] on a list of image files, returning per-image results in
     MegaDetector format.
@@ -497,8 +495,6 @@ def _run_detector_on_images(model,
         tiled (bool, optional): whether to use tiled inference
         tile_size (int, optional): tile size in pixels for tiled inference
         tile_overlap (int, optional): tile overlap in pixels for tiled inference
-        pad_batches (bool, optional): pad every batch of images (or tiles) to
-            [batch_size], required when the model has been compiled for a fixed batch size
 
     Returns:
         list: per-image result dicts in MegaDetector format
@@ -578,8 +574,7 @@ def _run_detector_on_images(model,
             detections_list = _detect(model, images_for_inference, threshold,
                                       tiled=tiled, tile_size=tile_size,
                                       tile_overlap=tile_overlap,
-                                      batch_size=batch_size,
-                                      pad_batches=pad_batches)
+                                      batch_size=batch_size)
         except Exception as e:
             # If batch inference fails, mark all images in batch as failed
             print(f'Error during inference: {e}')
@@ -639,7 +634,6 @@ def _run_detector_on_videos(model,
                             tile_size=None,
                             tile_overlap=None,
                             batch_size=1,
-                            pad_batches=False,
                             verbose=False):
     """
     Run [model] on a list of videos, returning one per-video result dict in
@@ -666,8 +660,6 @@ def _run_detector_on_videos(model,
         tile_overlap (int, optional): tile overlap in pixels for tiled inference
         batch_size (int, optional): for tiled inference, number of tiles to run
             through the model at once (frames are always processed one at a time)
-        pad_batches (bool, optional): pad every batch of frames (or tiles) to
-            [batch_size], required when the model has been compiled for a fixed batch size
         verbose (bool, optional): enable additional debug output
 
     Returns:
@@ -706,7 +698,7 @@ def _run_detector_on_videos(model,
         try:
             detections = _detect(model, [frame_image], threshold, tiled=tiled,
                                  tile_size=tile_size, tile_overlap=tile_overlap,
-                                 batch_size=batch_size, pad_batches=pad_batches)[0]
+                                 batch_size=batch_size)[0]
         except Exception as e:
             print(f'Error during inference on frame {frame_id}: {e}')
             return {'file': frame_id, 'detections': []}
@@ -837,10 +829,9 @@ def run_detector_batch(
             tiles per batch for tiled inference; video frames are processed one at a time)
         include_image_size (bool, optional): whether to include image dimensions in output
             (images only)
-        optimize_for_inference (bool, optional): whether to optimize the model for inference,
-            which should be a free lunch, but as of 9/2025 there is some risk of accuracy
-            regression.  The optimized model is compiled for [batch_size], so smaller
-            batches (including individual video frames) are padded to [batch_size].
+        optimize_for_inference (bool, optional): whether to optimize the model for inference
+            (on NVIDIA GPUs only; see load_model), which is much faster, but changes results
+            slightly
         worker_type (str, optional): 'thread' or 'process' for image loading workers
             (default: 'thread')
         skip_images (bool, optional): ignore images, only process videos
@@ -945,6 +936,7 @@ def run_detector_batch(
     model_type = model_info['model_type']
     image_size = model_info['image_size']
     detection_categories = model_info['detection_categories']
+    optimized_for_inference = model_info['optimized_for_inference']
 
     # Tiles match the resolution the model runs at
     tile_size = image_size
@@ -952,9 +944,6 @@ def run_detector_batch(
     if tiled:
         print(f'Using tiled inference with {tile_size}x{tile_size} tiles, '
               f'overlapping by {tile_overlap} pixels')
-
-    # A model optimized for inference only accepts batches of the size it was compiled for
-    pad_batches = optimize_for_inference
 
     results = []
 
@@ -971,8 +960,7 @@ def run_detector_batch(
             include_image_size=include_image_size,
             tiled=tiled,
             tile_size=tile_size,
-            tile_overlap=tile_overlap,
-            pad_batches=pad_batches))
+            tile_overlap=tile_overlap))
 
     # Process videos
     if len(video_files) > 0:
@@ -990,7 +978,6 @@ def run_detector_batch(
             tile_size=tile_size,
             tile_overlap=tile_overlap,
             batch_size=batch_size,
-            pad_batches=pad_batches,
             verbose=verbose))
 
     results = sort_list_of_dicts_by_key(results,'file')
@@ -1000,6 +987,7 @@ def run_detector_batch(
         'model_type': model_type,
         'image_size': image_size,
         'tiled': tiled,
+        'optimized_for_inference': optimized_for_inference,
         'confidence_threshold': threshold
     }
     if tiled:
@@ -1116,7 +1104,8 @@ def main():
     parser.add_argument(
         '--optimize_for_inference',
         action='store_true',
-        help='Optimize the model for inference after loading'
+        help='Optimize the model for faster inference (NVIDIA GPUs only); results differ '
+             'slightly from the unoptimized model'
     )
 
     parser.add_argument(
