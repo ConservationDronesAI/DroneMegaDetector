@@ -5,7 +5,8 @@
 * [Overview](#overview)
 * [Model categories](#model-categories)
 * [Flight altitude and image scale](#flight-altitude-and-image-scale)
-* [Running the model](#running-the-model)
+* [Running the model on images](#running-the-model-on-images)
+* [Running the model on videos](#running-the-model-on-videos)
 * [Hugging Face repository](#hugging-face-repository)
 * [Sample output](#sample-output)
 * [Preprint](#preprint-paper-link)
@@ -37,9 +38,9 @@ The model's training data predominantly represents drone flights conducted at ap
 As altitude increases, animals occupy fewer pixels in the image. Detection performance can therefore decline when targets become substantially smaller than those represented in the training imagery.
 
 
-## Running the model
+## Running the model on images
 
-We provide two inference scripts:
+We provide two image-based inference scripts:
 
 * `inference-demo.py` is a simple script that runs on a single image, intended for quick testing to make sure the model runs properly in your environment.  This script creates and displays an annotated image, but doesn't write results to a file.
 * `inference-batch.py` is intended for practical workflows; it processes a folder recursively and writes results to a .json file.
@@ -110,11 +111,108 @@ Arguments:
 
 Videos are processed by sampling frames (one frame per second by default).  Each video gets a single entry in the output file, and each detection includes the `frame_number` of the frame it came from.
 
+
 ### Tiled inference
 
 Both inference scripts support tiled inference for large images.  Tiled inference divides the input image into 1280 × 1280 pixel tiles (matching the resolution at which the model was trained) and performs detection independently on each tile before combining the detections.  Adjacent tiles overlap by 100 pixels by default (`inference-batch.py` can change this with `--tile_overlap`), and duplicate detections in overlapping regions are removed with non-maximum suppression.  Enable tiled inference using the `--tiled` argument.
 
 Tiled inference can be useful when each image is substantially larger than the model's training resolution (1280 × 1280), particularly when animals occupy a small proportion of the full image.
+
+## Running the model on videos
+
+We provide three video-based inference scripts:
+
+* `inference-video.py` is a dedicated video batch script (without tracking) that samples video frames at a target frames-per-second (`--fps`) rate and writes results to a `.json` file in the MegaDetector format.
+* `inference-video-tracking-rfdetr.py` runs the local RF-DETR `.pth` model with **ByteTrack** object tracking on a video, producing both an annotated `.mp4` video and a MegaDetector `.json` file with persistent `tracker_id`s.
+* `inference-video-tracking-huggingface.py` runs the Hugging Face `transformers` version of the model with **ByteTrack** object tracking on a video, producing both an annotated `.mp4` video and a MegaDetector `.json` file with persistent `tracker_id`s.
+
+### Using inference-video.py (Video without tracking)
+
+`inference-video.py` is a streamlined video-only script that processes a single video or a folder of videos (recursively) at a specified frames-per-second (`--fps`) rate and outputs a `.json` file in the [MegaDetector output format](https://lila.science/megadetector-output-format). It automatically detects and applies hardware acceleration (`float16`) on NVIDIA CUDA GPUs and Apple Silicon (MPS).
+
+Usage:
+
+```bash
+python src/inference-video.py \
+    path/to/model.pth \
+    path/to/video_or_folder \
+    path/to/results.json \
+    --fps 30
+```
+
+Arguments:
+
+| Argument                       | Required | Description                                                                                   |
+| ------------------------------ | -------- | --------------------------------------------------------------------------------------------- |
+| `detector_file`                | Yes      | Path to the RF-DETR `.pth` checkpoint                                                         |
+| `folder`                       | Yes      | Path to a folder of videos (searched recursively) or a single video file                      |
+| `output_file`                  | Yes      | Path for the output `.json` file                                                              |
+| `--fps`                        | No       | Frames per second to sample and run inference on (default `1.0`)                              |
+| `--threshold`                  | No       | Detection confidence threshold (default `0.005`)                                              |
+| `--image_size`, `--resolution` | No       | Inference resolution, and tile size with `--tiled` (default `1280`)                           |
+| `--tiled`                      | No       | Enables tiled inference                                                                       |
+| `--tile_overlap`               | No       | Tile overlap, in pixels or as a fraction of the tile size (default `100`); implies `--tiled`  |
+| `--batch_size`                 | No       | Number of tiles to run through the model at once with `--tiled` (default `1`)                 |
+| `--verbose`                    | No       | Enables additional debug output                                                               |
+
+
+### Using inference-video-tracking-rfdetr.py (Video with tracking - RF-DETR)
+
+`inference-video-tracking-rfdetr.py` runs the local RF-DETR `.pth` checkpoint on a video file and associates detections across frames using **ByteTrack**. It outputs both an annotated `.mp4` video showing bounding boxes and track IDs, and a MegaDetector-format `.json` file containing `tracker_id` and `frame_number` for each detection. Hardware acceleration for CUDA and Apple MPS is enabled automatically.
+
+By default, the script processes the video at its native frame rate for optimal tracking continuity, though you can sub-sample the frame rate using `--fps`.
+
+Usage:
+
+```bash
+python src/inference-video-tracking-rfdetr.py \
+    path/to/model.pth \
+    path/to/video.mp4 \
+    --output_video path/to/output_tracked.mp4 \
+    --output_json path/to/output_tracked.json
+```
+
+Arguments:
+
+| Argument                       | Required | Description                                                                                   |
+| ------------------------------ | -------- | --------------------------------------------------------------------------------------------- |
+| `detector_file`                | Yes      | Path to the RF-DETR `.pth` checkpoint                                                         |
+| `video_file`                   | Yes      | Path to the input video file                                                                  |
+| `--fps`                        | No       | Target FPS to run inference and tracking on (default: uses the video's native FPS)            |
+| `--output_video`               | No       | Path for the annotated output `.mp4` video (default `output_tracked.mp4`)                     |
+| `--output_json`                | No       | Path for the MegaDetector output `.json` file (default `output_tracked.json`)                 |
+| `--threshold`                  | No       | Detection confidence threshold (default `0.005`)                                              |
+| `--image_size`, `--resolution` | No       | Inference resolution, and tile size with `--tiled` (default `1280`)                           |
+| `--tiled`                      | No       | Enables tiled inference                                                                       |
+| `--tile_overlap`               | No       | Tile overlap, in pixels or as a fraction of the tile size (default `100`); implies `--tiled`  |
+| `--batch_size`                 | No       | Number of tiles to run through the model at once with `--tiled` (default `1`)                 |
+
+
+### Using inference-video-tracking-huggingface.py (Video with tracking - Hugging Face)
+
+`inference-video-tracking-huggingface.py` automatically downloads and runs the model from Hugging Face (`ConservationDrones/DroneMegaDetector`) with **ByteTrack** object tracking. Like the RF-DETR tracking script, it automatically optimizes for CUDA and Apple MPS (`float16`), defaults to the video's native frame rate, and outputs both an annotated `.mp4` video and a MegaDetector `.json` file.
+
+Usage:
+
+```bash
+python src/inference-video-tracking-huggingface.py \
+    path/to/video.mp4 \
+    --output_video path/to/output_tracked.mp4 \
+    --output_json path/to/output_tracked.json
+```
+
+Arguments:
+
+| Argument                       | Required | Description                                                                                   |
+| ------------------------------ | -------- | --------------------------------------------------------------------------------------------- |
+| `input_video`                  | Yes      | Path to the input video file                                                                  |
+| `--fps`                        | No       | Target FPS to run inference and tracking on (default: uses the video's native FPS)            |
+| `--output_video`               | No       | Path for the annotated output `.mp4` video (default `output_tracked.mp4`)                     |
+| `--output_json`                | No       | Path for the MegaDetector output `.json` file (default `output_tracked.json`)                 |
+| `--threshold`                  | No       | Detection confidence threshold (default `0.3`)                                                |
+| `--image_size`, `--resolution` | No       | Inference resolution, and tile size with `--tiled` (default `1280`)                           |
+| `--tiled`                      | No       | Enables tiled inference                                                                       |
+| `--tile_overlap`               | No       | Tile overlap, in pixels or as a fraction of the tile size (default `100`); implies `--tiled`  |
 
 
 ## Hugging Face repository
