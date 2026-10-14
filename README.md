@@ -8,6 +8,8 @@
 * [Running the model](#running-the-model)
 * [Hugging Face repository](#hugging-face-repository)
 * [Sample output](#sample-output)
+* [Preprint](#preprint)
+* [Referencing](#Referencing/Citation)
 
 
 ## Overview
@@ -143,3 +145,10 @@ Image from the <a href="https://edmond.mpg.de/dataset.xhtml?persistentId=doi:10.
 <img src="images/anno_reinhard-savmap~savmap-zenodo~c8135057690b494aad449b969b6fe7b8.jpg"><br/>
 Image from the <a href="https://huggingface.co/datasets/fadel841/savmap">SAVMAP</a> dataset.<br/>
 
+## Preprint paper link
+https://doi.org/10.64898/2026.10.12.758430
+
+
+## Referencing/Citation
+Chaim Chai Elchik, Steven Longmore, Dan Morris, Ben Chai Weinstein, Josh Veitch-Michaelis, Camee Knops, Freya Richards, Serge Wich
+bioRxiv 2026.10.12.758430; doi: https://doi.org/10.64898/2026.10.12.758430
