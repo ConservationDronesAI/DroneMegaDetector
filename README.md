@@ -8,8 +8,8 @@
 * [Running the model](#running-the-model)
 * [Hugging Face repository](#hugging-face-repository)
 * [Sample output](#sample-output)
-* [Preprint](#preprint)
-* [Referencing](#Referencing/Citation)
+* [Preprint](#preprint-paper-link)
+* [Citation](#citation)
 
 
 ## Overview
@@ -149,6 +149,6 @@ Image from the <a href="https://huggingface.co/datasets/fadel841/savmap">SAVMAP<
 https://doi.org/10.64898/2026.10.12.758430
 
 
-## Referencing/Citation
+## Citation
 Chaim Chai Elchik, Steven Longmore, Dan Morris, Ben Chai Weinstein, Josh Veitch-Michaelis, Camee Knops, Freya Richards, Serge Wich
 bioRxiv 2026.10.12.758430; doi: https://doi.org/10.64898/2026.10.12.758430
