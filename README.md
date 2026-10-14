@@ -75,7 +75,7 @@ If the input filename is "image.jpg", the default output filename is "image.anno
 
 ### Using inference-batch.py
 
-`inference-batch.py` runs the model on all the images and videos in a folder (recursively), or on a single image or video file, and writes the results to a .json file in the [MegaDetector output format](https://lila.science/megadetector-output-format).
+`inference-batch.py` runs the model on all the images and videos in a folder (recursively), or on a single image or video file, and writes the results to a .json file in the [MegaDetector format](https://lila.science/megadetector-output-format).
 
 Usage:
 
@@ -122,13 +122,13 @@ Tiled inference can be useful when each image is substantially larger than the m
 
 We provide three video-based inference scripts:
 
-* `inference-video.py` is a dedicated video batch script (without tracking) that samples video frames at a target frames-per-second (`--fps`) rate and writes results to a `.json` file in the MegaDetector format.
-* `inference-video-tracking-rfdetr.py` runs the local RF-DETR `.pth` model with **ByteTrack** object tracking on a video, producing both an annotated `.mp4` video and a MegaDetector `.json` file with persistent `tracker_id`s.
-* `inference-video-tracking-huggingface.py` runs the Hugging Face `transformers` version of the model with **ByteTrack** object tracking on a video, producing both an annotated `.mp4` video and a MegaDetector `.json` file with persistent `tracker_id`s.
+* `inference-video.py` samples video frames at a target frame rate (`--fps`), runs those frames through the RF-DETR .pth model, and writes results to a .json file in the [MegaDetector format](https://lila.science/megadetector-output-format).
+* `inference-video-tracking-rfdetr.py` runs the local RF-DETR .pth model with [ByteTrack](https://github.com/FoundationVision/ByteTrack) object tracking on a video, producing both an annotated .mp4 video and a .json file in the [MegaDetector format](https://lila.science/megadetector-output-format) with persistent track IDs.
+* `inference-video-tracking-huggingface.py` runs the Hugging Face transformers version of the model with [ByteTrack](https://github.com/FoundationVision/ByteTrack) object tracking on a video, producing both an annotated .mp4 video and .json file in the [MegaDetector format](https://lila.science/megadetector-output-format) with persistent track IDs.
 
-### Using inference-video.py (Video without tracking)
+### Using inference-video.py (video without tracking)
 
-`inference-video.py` is a streamlined video-only script that processes a single video or a folder of videos (recursively) at a specified frames-per-second (`--fps`) rate and outputs a `.json` file in the [MegaDetector output format](https://lila.science/megadetector-output-format). It automatically detects and applies hardware acceleration (`float16`) on NVIDIA CUDA GPUs and Apple Silicon (MPS).
+`inference-video.py` processes a single video or a folder of videos (recursively) through an RF-DETR .pth checkpoint at a specified frames-per-second (`--fps`) rate and outputs a `.json` file in the [MegaDetector format](https://lila.science/megadetector-output-format).
 
 Usage:
 
@@ -156,11 +156,11 @@ Arguments:
 | `--verbose`                    | No       | Enables additional debug output                                                               |
 
 
-### Using inference-video-tracking-rfdetr.py (Video with tracking - RF-DETR)
+### Using inference-video-tracking-rfdetr.py (video with tracking: RF-DETR)
 
-`inference-video-tracking-rfdetr.py` runs the local RF-DETR `.pth` checkpoint on a video file and associates detections across frames using **ByteTrack**. It outputs both an annotated `.mp4` video showing bounding boxes and track IDs, and a MegaDetector-format `.json` file containing `tracker_id` and `frame_number` for each detection. Hardware acceleration for CUDA and Apple MPS is enabled automatically.
+`inference-video-tracking-rfdetr.py` runs a local RF-DETR .pth checkpoint on a video file and associates detections across frames using [ByteTrack](https://github.com/FoundationVision/ByteTrack). It outputs an annotated .mp4 video and a .json file in the [MegaDetector format](https://lila.science/megadetector-output-format) containing `tracker_id` and `frame_number` for each detection.
 
-By default, the script processes the video at its native frame rate for optimal tracking continuity, though you can sub-sample the frame rate using `--fps`.
+By default, the script processes the video at its native frame rate , though you can reduce the frame rate using `--fps`.
 
 Usage:
 
@@ -190,7 +190,7 @@ Arguments:
 
 ### Using inference-video-tracking-huggingface.py (Video with tracking - Hugging Face)
 
-`inference-video-tracking-huggingface.py` automatically downloads and runs the model from Hugging Face (`ConservationDrones/DroneMegaDetector`) with **ByteTrack** object tracking. Like the RF-DETR tracking script, it automatically optimizes for CUDA and Apple MPS (`float16`), defaults to the video's native frame rate, and outputs both an annotated `.mp4` video and a MegaDetector `.json` file.
+`inference-video-tracking-huggingface.py` downloads and runs the model from Hugging Face (`ConservationDrones/DroneMegaDetector`) with [ByteTrack](https://github.com/FoundationVision/ByteTrack) object tracking. Like the RF-DETR tracking script. It outputs an annotated .mp4 video and a .json file in the [MegaDetector format](https://lila.science/megadetector-output-format).
 
 Usage:
 
@@ -243,10 +243,13 @@ Image from the <a href="https://edmond.mpg.de/dataset.xhtml?persistentId=doi:10.
 <img src="images/anno_reinhard-savmap~savmap-zenodo~c8135057690b494aad449b969b6fe7b8.jpg"><br/>
 Image from the <a href="https://huggingface.co/datasets/fadel841/savmap">SAVMAP</a> dataset.<br/>
 
+
 ## Preprint paper link
+
 https://doi.org/10.64898/2026.10.12.758430
 
 
 ## Citation
+
 Chaim Chai Elchik, Steven Longmore, Dan Morris, Ben Chai Weinstein, Josh Veitch-Michaelis, Camee Knops, Freya Richards, Serge Wich
 bioRxiv 2026.10.12.758430; doi: https://doi.org/10.64898/2026.10.12.758430
