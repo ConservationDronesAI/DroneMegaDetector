@@ -235,7 +235,7 @@ Image from the <a href="https://zenodo.org/records/3234780">Aerial Elephant Data
 Image from <a href="https://data.4tu.nl/articles/dataset/Improving_the_precision_and_accuracy_of_animal_population_estimates_with_aerial_image_object_detection/12713903/1">Improving the precision and accuracy of animal population estimates with aerial image object detection</a>.<br/>
 
 <img src="images/anno_koger-drones~kenyan-ungulates~ungulate-annotations~NOV02_2017_DJI_0033-3210.jpg"><br/>
-Image from <a href="https://edmond.mpg.de/dataset.xhtml?persistentId=doi:10.17617/3.EMRZGH">Quantifying the movement, behaviour and environmental context of group-living animals using drones and computer vision</a>.<br/><br/>
+Image from <a href="https://edmond.mpg.de/dataset.xhtml?persistentId=doi:10.17617/3.EMRZGH">Quantifying the movement, behaviour and environmental context of group-living animals using drones and computer vision</a>.<br/>
 
 <img src="images/anno_naik-bucktales~Detection_Dataset~coco_format_v1~test_images~cllduy3d20ak3078e3dkf5g5w.jpg"><br/>
 Image from the <a href="https://edmond.mpg.de/dataset.xhtml?persistentId=doi:10.17617/3.JCZ9WK">BuckTales</a> dataset.<br/>
