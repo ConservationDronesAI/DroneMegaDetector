@@ -243,11 +243,20 @@ Image from the <a href="https://edmond.mpg.de/dataset.xhtml?persistentId=doi:10.
 <img src="images/anno_reinhard-savmap~savmap-zenodo~c8135057690b494aad449b969b6fe7b8.jpg"><br/>
 Image from the <a href="https://huggingface.co/datasets/fadel841/savmap">SAVMAP</a> dataset.<br/>
 
-![Video Demo Zebras](videos/DJI_0429_hf_native.gif)
+<p>
+  <strong>Video Demo Zebras</strong><br>
+  <img src="videos/DJI_0429_hf_native.gif" width="1000" alt="Video Demo Zebras">
+</p>
 
-![Video Demo Elephants](videos/DJI_0395_hf_native.gif)
+<p>
+  <strong>Video Demo Elephants</strong><br>
+  <img src="videos/DJI_0395_hf_native.gif" width="1000" alt="Video Demo Elephants">
+</p>
 
-![Video Demo Buffalos](videos/DJI_0490_hf_native.gif)
+<p>
+  <strong>Video Demo Buffalos</strong><br>
+  <img src="videos/DJI_0490_hf_native.gif" width="1000" alt="Video Demo Buffalos">
+</p>
 
 
 ## Preprint paper link
