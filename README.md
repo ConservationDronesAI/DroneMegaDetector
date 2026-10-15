@@ -266,5 +266,5 @@ https://doi.org/10.64898/2026.10.12.758430
 
 ## Citation
 
-Chaim Chai Elchik, Steven Longmore, Dan Morris, Ben Chai Weinstein, Josh Veitch-Michaelis, Camee Knops, Freya Richards, Serge Wich
+Chaim Chai Elchik, Steven Longmore, Dan Morris, Ben Weinstein, Josh Veitch-Michaelis, Camee Knops, Freya Richards, Serge Wich
 bioRxiv 2026.10.12.758430; doi: https://doi.org/10.64898/2026.10.12.758430
