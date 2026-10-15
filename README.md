@@ -243,6 +243,12 @@ Image from the <a href="https://edmond.mpg.de/dataset.xhtml?persistentId=doi:10.
 <img src="images/anno_reinhard-savmap~savmap-zenodo~c8135057690b494aad449b969b6fe7b8.jpg"><br/>
 Image from the <a href="https://huggingface.co/datasets/fadel841/savmap">SAVMAP</a> dataset.<br/>
 
+![Video Demo Zebras](videos/DJI_0429_hf_native.gif)
+
+![Video Demo Elephants](videos/DJI_0395_hf_native.gif)
+
+![Video Demo Buffalos](videos/DJI_0490_hf_native.gif)
+
 
 ## Preprint paper link
 
