@@ -40,7 +40,9 @@ As altitude increases, animals occupy fewer pixels in the image. Detection perfo
 
 ## Downloading the model weights
 
-The RF-DETR model weights can be found via the release page or the following link (https://github.com/ConservationDronesAI/DroneMegaDetector/releases/download/v1.1/DroneMegaDetector_RFDETRMedium_2026.10.04.pth).
+The RF-DETR model weights can be found via the release page or the following link:
+
+* https://github.com/ConservationDronesAI/DroneMegaDetector/releases/download/v1.1/DroneMegaDetector_RFDETRMedium_2026.10.04.pth
 
 ## Running the model on images
 
