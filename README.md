@@ -5,6 +5,7 @@
 * [Overview](#overview)
 * [Model categories](#model-categories)
 * [Flight altitude and image scale](#flight-altitude-and-image-scale)
+* [Downloading the model weights](#downloading-the-model-weights)
 * [Running the model on images](#running-the-model-on-images)
 * [Running the model on videos](#running-the-model-on-videos)
 * [Hugging Face repository](#hugging-face-repository)
@@ -37,6 +38,9 @@ The model's training data predominantly represents drone flights conducted at ap
 
 As altitude increases, animals occupy fewer pixels in the image. Detection performance can therefore decline when targets become substantially smaller than those represented in the training imagery.
 
+## Downloading the model weights
+
+The RF-DETR model weights can be found via the release page or the following link ().
 
 ## Running the model on images
 
